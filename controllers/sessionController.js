@@ -1,27 +1,32 @@
 const Session = require('../models/Session');
 const QRCode = require('qrcode');
+const crypto = require('crypto');
 
 // CREATE A SESSION AND GENERATE QR CODE (Lecturer only)
 const createSession = async (req, res) => {
   try {
     const { course, startTime, endTime } = req.body;
 
+    // Generate unique session token
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+
     // Create new session
     const newSession = new Session({
       course,
       lecturer: req.user.id,
       startTime,
-      endTime
+      endTime,
+      sessionToken
     });
 
     // Save session to get its ID
     await newSession.save();
 
-    // Generate QR code using the session ID
+    // Generate QR code using session token (NOT session ID)
     const qrData = JSON.stringify({
-      sessionId: newSession._id,
+      sessionToken: sessionToken,
       courseId: course,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes from now
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000)
     });
 
     // Convert to QR code image (base64)
@@ -43,6 +48,7 @@ const createSession = async (req, res) => {
         startTime: newSession.startTime,
         endTime: newSession.endTime,
         qrCode: newSession.qrCode,
+        sessionToken: newSession.sessionToken,
         qrCodeExpiresAt: newSession.qrCodeExpiresAt
       }
     });

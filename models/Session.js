@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const SessionSchema = new mongoose.Schema({
   course: {
@@ -27,6 +28,10 @@ const SessionSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  sessionToken: {
+    type: String,
+    default: null
+  },
   qrCodeExpiresAt: {
     type: Date,
     default: null
@@ -34,7 +39,10 @@ const SessionSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  }
+  },
+  scannedIPs: [{
+    type: String
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Session', SessionSchema);
